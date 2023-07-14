@@ -9,8 +9,21 @@ persons.forEach((element) => console.log(element));
 
 const app = express();
 
+// json parsing middleware for request/response json bodies
 app.use(express.json());
-app.use(morgan("tiny"));
+
+// configure morgan logging to log request body as well
+// use tiny config string with the added token below
+morgan.token(
+  'req-body',
+  (request, response) =>
+    JSON.stringify(request.body)
+);
+app.use(
+  morgan(
+    ":method :url :status :res[content-length] - :response-time ms :req-body"
+  )
+);
 
 app.get("/", (request, response) => {
   response.send("<h1>Hello, Phonebook!</h1>");
@@ -106,7 +119,6 @@ app.post("/api/persons", (request, response) => {
   };
 
   persons = [...persons, person];
-  console.log(person);
   response.json(person);
 });
 
