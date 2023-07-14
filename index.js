@@ -1,5 +1,6 @@
 const express = require("express");
 const fs = require("fs");
+const morgan = require('morgan');
 
 let rawData = fs.readFileSync("./db.json");
 let persons = JSON.parse(rawData).persons;
@@ -9,6 +10,7 @@ persons.forEach((element) => console.log(element));
 const app = express();
 
 app.use(express.json());
+app.use(morgan("tiny"));
 
 app.get("/", (request, response) => {
   response.send("<h1>Hello, Phonebook!</h1>");
