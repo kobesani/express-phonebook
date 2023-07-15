@@ -10,6 +10,7 @@ persons.forEach((element) => console.log(element));
 
 const app = express();
 
+app.use(express.static("build"))
 app.use(cors());
 
 // json parsing middleware for request/response json bodies
