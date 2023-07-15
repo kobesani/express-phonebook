@@ -9,4 +9,5 @@ cd ./react-phonebook-main
 npm install
 # # execute production build and copy to build-test in backend
 npm run build
-cp -r ./build ../build-test
+cp -r ./build ../build
+rm -rf react-phonebook-main
