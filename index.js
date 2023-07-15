@@ -48,8 +48,10 @@ app.get("/api/persons/:id", (request, response) => {
   if (person) {
     response.json(person);
   } else {
-    response.statusMessage =
-        `A person (entry) with the id = ${id} was not found in the database`;
+    response.setHeader(
+      "X-Status-Message",
+      `A person (entry) with the id = ${id} was not found in the database`
+    );
     response.status(404).end();
   }
 });
