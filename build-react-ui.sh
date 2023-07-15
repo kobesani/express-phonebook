@@ -5,9 +5,15 @@
 curl -L https://github.com/kobesani/react-phonebook/archive/refs/heads/main.zip -o main.zip
 unzip ./main.zip
 cd ./react-phonebook-main
+echo "Current working dir ${PWD}"
 # # install react dependencies
 npm install
 # # execute production build and copy to build-test in backend
 npm run build
 cp -r ./build ../build
+
+echo "removing react-phonebook-main folder"
 rm -rf react-phonebook-main
+
+cd ../
+npm install
