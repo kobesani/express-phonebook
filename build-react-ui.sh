@@ -2,7 +2,7 @@
 
 # git clone git@github.com:kobesani/react-phonebook.git
 # echo "cloned react-phonebook repo"
-wget "https://github.com/kobesani/react-phonebook/archive/refs/heads/main.zip"
+curl -L https://github.com/kobesani/react-phonebook/archive/refs/heads/main.zip -o main.zip
 unzip ./main.zip
 # cd ./react-phonebook 
 # # install react dependencies
