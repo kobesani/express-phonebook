@@ -20,3 +20,5 @@ package.tgz
 **/.env
 
 package-lock.json
+.vscode/
+build/

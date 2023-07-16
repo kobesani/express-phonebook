@@ -1,7 +1,9 @@
 const cors = require("cors");
 const express = require("express");
 const fs = require("fs");
+const mongoose = require("mongoose");
 const morgan = require('morgan');
+const Person = require("./models/person.js");
 
 let rawData = fs.readFileSync("./db.json");
 let persons = JSON.parse(rawData).persons;
@@ -42,9 +44,15 @@ app.get("/info", (request, response) => {
   );
 });
 
+// app.get("/api/persons", (request, response) => {
+//   response.json(persons);
+// });
+
 app.get("/api/persons", (request, response) => {
-  response.json(persons);
-});
+  Person.find({}).then(notes => {
+    response.json(notes);
+  })
+})
 
 app.get("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
