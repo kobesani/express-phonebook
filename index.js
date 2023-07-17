@@ -95,6 +95,25 @@ app.delete("/api/persons/:id", (request, response) => {
     );
 });
 
+app.put("/api/persons/:id", (request, response) => {
+  Person.findByIdAndUpdate(
+    request.params.id,
+    {name: request.body.name, number: request.body.number},
+    {new: true}
+  )
+    .then((updatedPerson) => {
+      if (updatedPerson) {
+        return (response.json(updatedPerson));
+      } else {
+        response.setHeader(
+          "X-Status-Message",
+          `Person with id = ${request.params.id} not found.`
+        );
+        return (response.status(404).end());
+      }
+    });
+});
+
 app.post("/api/persons", (request, response) => {
   const body = request.body;
   if (!(body.name && body.number)) {
