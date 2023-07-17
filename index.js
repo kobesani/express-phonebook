@@ -98,6 +98,11 @@ app.delete("/api/persons/:id", (request, response) => {
 app.post("/api/persons", (request, response) => {
   const body = request.body;
   if (!(body.name && body.number)) {
+    response
+    .setHeader(
+      "X-Status-Message",
+      `Both name and number must be provided`
+    );
     return (
       response
         .status(400)
