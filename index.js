@@ -1,7 +1,6 @@
 const cors = require("cors");
 const express = require("express");
 const fs = require("fs");
-const mongoose = require("mongoose");
 const morgan = require('morgan');
 const Person = require("./models/person.js");
 
@@ -32,10 +31,6 @@ app.use(
   )
 );
 
-app.get("/", (request, response) => {
-  response.send("<h1>Hello, Phonebook!</h1>");
-});
-
 app.get("/info", (request, response) => {
   const currentTimestamp = new Date();
   response.send(
@@ -56,12 +51,14 @@ app.get("/api/persons/:id", (request, response) => {
     .then(
       matchingPerson => {
         console.log(matchingPerson);
-        response.json(
-          {
-            id: matchingPerson._id,
-            name: matchingPerson.name,
-            number: matchingPerson.number
-          }
+        return (
+          response.json(
+            {
+              id: matchingPerson._id,
+              name: matchingPerson.name,
+              number: matchingPerson.number
+            }
+          )
         );
       }
     )
@@ -72,23 +69,30 @@ app.get("/api/persons/:id", (request, response) => {
             "X-Status-Message",
             `Person with id = ${request.params.id} not found`
           );
-        response.status(404).end();
+        return (response.status(404).end());
       }
     );
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-  // Person.findByIdAndDelete(request.params.id)
-  //   .then((deletedDocument) => {
-  //     if (deletedDocument) {
-
-  //     }
-  //   })
-  //   .catch();
-  const id = Number(request.params.id);
-  console.log(id);
-  persons = persons.filter((person) => person.id !== id);
-  response.status(204).end();
+  Person.findByIdAndDelete(request.params.id)
+    .then(
+      deletedPerson => {
+        if (!deletedPerson) {
+          response.setHeader(
+            "X-Status-Message",
+            `Person with id = ${request.params.id} not found.`
+          );
+          return (response.status(404).end());
+        }
+        return (response.status(204).json(deletedPerson));
+      }
+    )
+    .catch(
+      error => response.status(400).json(
+        {error: `Error retrieving person: ${error}`}
+      )
+    );
 });
 
 app.post("/api/persons", (request, response) => {
