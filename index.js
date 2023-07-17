@@ -48,7 +48,7 @@ app.get("/api/persons", (request, response) => {
   Person.find({}).then(notes => {
     response.json(notes);
   })
-})
+});
 
 app.get("/api/persons/:id", (request, response) => {
   Person
@@ -78,36 +78,18 @@ app.get("/api/persons/:id", (request, response) => {
 });
 
 app.delete("/api/persons/:id", (request, response) => {
+  // Person.findByIdAndDelete(request.params.id)
+  //   .then((deletedDocument) => {
+  //     if (deletedDocument) {
+
+  //     }
+  //   })
+  //   .catch();
   const id = Number(request.params.id);
   console.log(id);
   persons = persons.filter((person) => person.id !== id);
   response.status(204).end();
 });
-
-const generateId = () => {
-  const maxValue = 1e10;
-  const maxTries = 10;
-  let tryCounter = 0;
-
-  while (true) {
-    console.log(tryCounter);
-    if (tryCounter === maxTries) {
-      console.log(
-        "Max tries to generate new id reached, exiting with max value"
-      );
-      return (
-        persons.length > 0 ?
-          Math.max(...persons.map((n) => n.id)) + 1 :
-          0
-      );
-    }
-    const candidateId = Math.floor(Math.random() * maxValue);
-    if (persons.filter((person) => person.id === candidateId).length === 0) {
-      return (candidateId);
-    }
-    tryCounter++;
-  }
-};
 
 app.post("/api/persons", (request, response) => {
   const body = request.body;
@@ -123,26 +105,30 @@ app.post("/api/persons", (request, response) => {
     );
   }
 
-  if (persons.filter((person) => person.name === body.name).length > 0) {
-    return (
-      response
-        .status(400)
-        .json(
-          {
-            error: "The provided name already exists in the database."
-          }
-        )
+  Person
+    .findOne({name: body.name})
+    .then(
+      foundPerson => {
+        console.log(foundPerson);
+        if (foundPerson) {
+          return (
+            response.status(400).json({
+              error: "The provided name already exists in the database."
+            })
+          );
+        }
+
+        const personToAdd = new Person({
+          name: body.name, number: body.number
+        });
+        personToAdd.save().then(savedPerson => response.json(savedPerson));
+      }
+    )
+    .catch(
+      error => response.status(400).json(
+        {error: `Error retrieving person: ${error}`}
+      )
     );
-  }
-
-  const person = {
-    id: generateId(),
-    name: body.name,
-    number: body.number
-  };
-
-  persons = [...persons, person];
-  response.json(person);
 });
 
 const PORT = process.env.PORT || 3001;
