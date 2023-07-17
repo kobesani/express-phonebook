@@ -44,10 +44,6 @@ app.get("/info", (request, response) => {
   );
 });
 
-// app.get("/api/persons", (request, response) => {
-//   response.json(persons);
-// });
-
 app.get("/api/persons", (request, response) => {
   Person.find({}).then(notes => {
     response.json(notes);
@@ -55,18 +51,30 @@ app.get("/api/persons", (request, response) => {
 })
 
 app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const person = persons.find((person) => person.id === id);
-
-  if (person) {
-    response.json(person);
-  } else {
-    response.setHeader(
-      "X-Status-Message",
-      `A person (entry) with the id = ${id} was not found in the database`
+  Person
+    .findById(request.params.id)
+    .then(
+      matchingPerson => {
+        console.log(matchingPerson);
+        response.json(
+          {
+            id: matchingPerson._id,
+            name: matchingPerson.name,
+            number: matchingPerson.number
+          }
+        );
+      }
+    )
+    .catch(
+      error => {
+        response
+          .setHeader(
+            "X-Status-Message",
+            `Person with id = ${request.params.id} not found`
+          );
+        response.status(404).end();
+      }
     );
-    response.status(404).end();
-  }
 });
 
 app.delete("/api/persons/:id", (request, response) => {
