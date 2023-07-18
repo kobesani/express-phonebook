@@ -22,6 +22,12 @@ const errorHandler = (error, request, response, next) => {
         .status(400)
         .send({error: `malformatted id = ${request.params.id}`})
     );
+  } else if (error.name === "ValidationError") {
+    response.setHeader(
+      "X-Status-Message",
+      `400 - bad request, please make sure the data is formatted properly`
+    );
+    return (response.status(400).json({error: error.message}))
   }
 
   next(error);
@@ -107,7 +113,7 @@ app.put("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndUpdate(
     request.params.id,
     {name: request.body.name, number: request.body.number},
-    {new: true}
+    {new: true, runValidators: true, context: "query"}
   )
     .then(
       updatedPerson => {
@@ -124,24 +130,8 @@ app.put("/api/persons/:id", (request, response, next) => {
     .catch(error => next(error));
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const body = request.body;
-  if (!(body.name && body.number)) {
-    response
-    .setHeader(
-      "X-Status-Message",
-      `Both name and number must be provided`
-    );
-    return (
-      response
-        .status(400)
-        .json(
-          {
-            error: "Both name and number must be provided."
-          }
-        )
-    );
-  }
 
   Person
     .findOne({name: body.name})
@@ -156,10 +146,10 @@ app.post("/api/persons", (request, response) => {
           );
         }
 
-        const personToAdd = new Person({
-          name: body.name, number: body.number
-        });
-        personToAdd.save().then(savedPerson => response.json(savedPerson));
+        new Person({name: body.name, number: body.number})
+          .save()
+          .then(savedPerson => response.json(savedPerson))
+          .catch(error => next(error));
       }
     )
     .catch(
@@ -171,8 +161,6 @@ app.post("/api/persons", (request, response) => {
 
 app.use(unknownEndpoint);
 app.use(errorHandler);
-
-
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
